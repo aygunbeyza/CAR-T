@@ -1,0 +1,90 @@
+configfile:"config.yaml"
+cwd = os.getcwd()
+accession=config["accession"]
+
+rule all:
+    input:
+        expand("h5dumphdf5/{accession}.hdf5", accession=config["accession"])
+
+
+#rule get_SRA_by_accession:
+#    output:
+#        temp("reads/{accession}/{accession}_1.fastq"),
+#        temp("reads/{accession}/{accession}_2.fastq")
+#    params:
+#        args = "--split-files --include-technical --progress --details",
+#        accession = "{accession}"
+#    log:
+#        "reads/{accession}/{accession}.log"
+#    conda:
+#        "env.yml"
+#    shell:
+#        'mkdir -p reads/{params.accession} && \
+#        fasterq-dump {params.args} {params.accession} -O reads/{params.accession}'
+
+
+
+
+
+
+rule kallistoQuant_PE:
+    input:
+        "homo_sapiens/Homo_sapiens.GRCh38.96.gtf",
+        "homo_sapiens/Homo_sapiens.GRCh38.cdna.all.fa",
+        "homo_sapiens/transcripts_to_genes.txt",
+        index="homo_sapiens/transcriptome.idx",
+        r1="{accession}_1.fastq",
+        r2="{accession}_2.fastq"
+    output:
+        "quant/{accession}/abundance.h5",
+        "quant/{accession}/abundance.tsv",
+        "quant/{accession}/run_info.json"
+    params:
+        bootstrap="2",
+        accession = "{accession}"
+    conda:
+        "env.yml"
+    shell:
+        "mkdir -p quant/{params.accession} && \
+        kallisto quant -b {params.bootstrap} -i {input.index} -o quant/{params.accession} {input.r1} {input.r2}"
+
+
+rule h5dump:
+    input:
+        "quant/{accession}/abundance.h5"
+    output:
+        "h5dumphdf5/{accession}.hdf5"
+    shell:
+        "mkdir -p h5dumphdf5 && \
+        kallisto h5dump -o {output} -i {input}"
+
+
+
+
+
+rule R:
+    input:
+        h5="h5dumphdf5/results/{accession}.tsv",accession=config["accession"][]
+    output:
+        out="count_matrix.txt"
+    params:
+        accession = accession
+    shell:
+       "Rscript Quant.R {params.accession}"
+
+
+
+
+#rule mergeQuant:
+#    input:
+#        expand("quant/{accession}/abundance.h5",accession=config["accession"])
+#    output:
+#        out1="sleuth_object.so",
+#        out2="gene_table_results.txt"
+#    params:
+#        wd=cwd,
+#        condition="conditions.txt"
+#    conda:
+#        "r.yml"
+#    shell:
+#        "Rscript sleuthR.R {params.wd} {params.condition}"
