@@ -59,7 +59,14 @@ rule h5dump:
         kallisto h5dump -o {output} -i {input}"
 
 
-
+rule python:
+    input:
+        files=expand("{accession}.hdf5", accession=config["accession"]),
+        script="python.py"
+    outout:
+        "h5dumphdf5/Results/{accession}.tsv"
+    shell:
+        "python {input.script} -i {input.files} -o {output}"
 
 
 rule R:
