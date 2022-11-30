@@ -77,7 +77,7 @@ rule R:
     params:
         accession = accession
     shell:
-       "Rscript Quant.R {params.accession}"
+       "Rscript Bulk_rna_matrix.Rmd {params.accession}"
 
 
 
