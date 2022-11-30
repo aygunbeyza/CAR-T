@@ -1,0 +1,94 @@
+---
+title: "Bulk_RNA_matrix"
+author: "beyza"
+date: "2022-11-06"
+output: html_document
+---
+
+
+```{r}
+
+setwd("~/Desktop/Bioinformatic/Car-T/SRP238929/K_quant")
+base_dir <- "./quant"
+sample_id <- dir(file.path(base_dir))
+kal_dirs <- sapply(sample_id, function(id) file.path(base_dir, id))
+condition_df <- read.delim("SraRunTable.txt", sep = ",")
+s2c <- data.frame(path=kal_dirs,sample=sample_id,condition=condition_df,row.names = NULL,stringsAsFactors = FALSE)
+```
+
+Merge txt file
+```{r}
+library(reshape)
+setwd("~/Desktop/Bioinformatic/Car-T/SRP238929/K_quant/h5dumphdf5/Results")
+file_list <- list.files()
+```
+
+
+ Read in each file if its a csv file or `read.table` or `read.delim`
+subset the dataframe into 2 and add abundance data to them  ARE DATAFRAME!!
+
+```{r}
+list_of_files <- data.frame(lapply(file_list, read.csv, sep="\t"))
+```
+
+
+tpmleri almak ve ismini değiştirmek için
+```{r}
+list_of_files1 <- list_of_files[ , grepl( "tpm" , names( list_of_files ) ) ]
+file_list_list<-as.list(file_list)
+names(list_of_files1) <- c(file_list_list)
+#library(tidyverse)
+#library(xlsx)
+#library(readxl)
+#my_data <- read_excel("srr.xlsx")
+#my_data = as.data.frame(my_data)
+#my_data=as.list(my_data)
+
+#new_list_of_files1<-lapply(list_of_files1,            # Rename column names in list
+ #                     setNames,
+ #                     my_data)
+
+
+```
+
+
+
+
+```{r}
+list_of_files2 <- list_of_files[ , grepl( "target_id" , names( list_of_files ) ) ]
+list_of_files3 <- subset(list_of_files, select = c(target_id))
+list_of_files3$target_id<-gsub("\\..*","",list_of_files3$target_id)
+```
+
+
+
+??????????????????target_id kontrol bunıu düzenle
+```{r}
+identical(x, y, num.eq = TRUE, single.NA = TRUE, attrib.as.set = TRUE,
+          ignore.bytecode = TRUE, ignore.environment = FALSE,
+          ignore.srcref = TRUE, extptr.as.ref = FALSE)
+install.packages("parallel")
+```
+
+```{r}
+target_id_merge<-merge(list_of_files1, list_of_files3, all.x = TRUE)
+```
+
+biomart gen isimlerini çekmek için
+```{r}
+install.packages("rds")
+BiocManager::install("biomaRt")
+abrowseVignettes("biomaRt")
+library(biomaRt)
+ensembl <- useEnsembl(biomart = "genes", dataset = "hsapiens_gene_ensembl")
+a <- biomaRt::getBM( attributes = c("ensembl_transcript_id", "transcript_version", "ensembl_gene_id", "external_gene_name", "description","transcript_biotype"),mart = ensembl)
+a <- dplyr::rename(a, target_id = ensembl_transcript_id,ens_gene = ensembl_gene_id, ext_gene = external_gene_name)
+son<-merge(target_id_merge, a, by= "target_id", all.x = TRUE,all.y = TRUE)
+```
+
+matrix
+```{r}
+matrix<-subset(son,select = c(ext_gene, args[1]))
+write.table(matrix, 'count_matrix.txt', col.names = TRUE)
+```
+
