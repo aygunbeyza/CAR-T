@@ -1,0 +1,92 @@
+---
+title: "ensebl gene id"
+author: "beyza"
+date: "2022-10-17"
+output: html_document
+---
+
+Aşağıdaki komutlar bizi Ensembl'in en son Human Genes BioMart sürümüne bağlayacaktır.
+```{r}
+library(biomaRt)
+ensembl <- useEnsembl(biomart = "genes", dataset = "hsapiens_gene_ensembl")
+```
+
+ İhtiyacınız olan veritabanını belirleme
+```{r}
+listEnsembl()
+```
+ 
+ gen açıklama bilgilerine erişim sağlayan ana Ensembl mart'ı seçeceğiz.
+```{r}
+ensembl <- useEnsembl(biomart = "genes")
+```
+ 
+ Bir sonraki adımda, işlevi kullanarak seçilen BioMart'ta hangi veri kümelerinin mevcut olduğuna bakacağız 
+```{r}
+datasets <- listDatasets(ensembl)
+head(datasets)
+```
+ 
+ belirli bir terimle eşleşen herhangi bir girişi bulmaya çalışacak veya model. Örneğin, martımızdaki ' hsapiensensembl ' terimini içeren herhangi bir veri setinin ayrıntılarını bulmak istiyorsak aşağıdakileri yapabiliriz:
+```{r}
+searchDatasets(mart = ensembl, pattern = "hsapiens")
+```
+ 
+ Bir veri kümesi kullanmak için nesnemizi Martişlevi kullanarak güncelleyebiliriz 
+```{r}
+ensembl <- useDataset(dataset = "hsapiens_gene_ensembl", mart = ensembl)
+```
+ 
+ Daha önce de belirtildiği gibi, eğer kullanmak istediğiniz veri kümesi önceden biliniyorsa, yani bu işlemi daha önce yaptıysanız, tek adımda hem veritabanını hem de veri kümesini seçebiliriz:
+```{r}
+ensembl <- useEnsembl(biomart = "genes", dataset = "hsapiens_gene_ensembl")
+```
+ 
+ Örneğin, önce mevcut Ensembl Genomes marketlerini listeleyebiliriz:
+```{r}
+listEnsemblGenomes()
+```
+ 
+ Ensembl Plants veritabanını seçebilir#######düzenle
+```{r}
+ensembl_plants <- useEnsemblGenomes(biomart = "plants_mart")
+```
+ 
+ Veri almak için bir veri kümesi seçtikten sonra, bir sorgu oluşturup Ensembl BioMart sunucusuna göndermemiz gerekiyor. Bunu getBM()fonksiyonu kullanarak yapıyoruz.
+
+İşlevin getBM()tanıtılması gereken üç argümanı vardır: filtreler , değerler ve nitelikler .
+
+```{r}
+filters = listFilters(ensembl)
+```
+Nitelikler , almak istediğimiz verileri tanımlar. Örneğin, gen sembollerini veya kromozomal koordinatları almak isteyebiliriz.
+```{r}
+attributes = listAttributes(ensembl)
+```
+
+attributes: kişinin almak istediği özniteliklerin bir vektörüdür (= sorgunun çıktısı).
+filters: sorguya girdi olarak kullanılacak bir filtre vektörüdür.
+values: filtreler için bir değer vektörü. Birden çok filtrenin kullanılması durumunda, değerler bağımsız değişkeni, listedeki her konumun filtreler bağımsız değişkenindeki filtrelerin konumuna karşılık geldiği bir değerler listesi gerektirir (aşağıdaki örneklere bakın).
+mart: işlev Marttarafından oluşturulan sınıfın bir nesnesidir .useEnsembl()
+```{r}
+a <- biomaRt::getBM( attributes = c("ensembl_transcript_id", "transcript_version", "ensembl_gene_id", "external_gene_name", "description","transcript_biotype"),mart = ensembl)
+```
+
+kromozom adları için
+```{r}
+listFilterOptions(mart = ensembl, filter = "chromosome_name")
+```
+
+ Attribute Pages
+```{r}
+pages = attributePages(ensembl)
+pages
+mart <- useEnsembl(dataset = "hsapiens_gene_ensembl", biomart='ensembl')
+```
+ 
+ ###################################
+ 
+ 
+ 
+ 
+ 
