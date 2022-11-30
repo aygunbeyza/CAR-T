@@ -7,20 +7,20 @@ rule all:
         expand("h5dumphdf5/{accession}.hdf5", accession=config["accession"])
 
 
-#rule get_SRA_by_accession:
-#    output:
-#        temp("reads/{accession}/{accession}_1.fastq"),
-#        temp("reads/{accession}/{accession}_2.fastq")
-#    params:
-#        args = "--split-files --include-technical --progress --details",
-#        accession = "{accession}"
-#    log:
-#        "reads/{accession}/{accession}.log"
-#    conda:
-#        "env.yml"
-#    shell:
-#        'mkdir -p reads/{params.accession} && \
-#        fasterq-dump {params.args} {params.accession} -O reads/{params.accession}'
+rule get_SRA_by_accession:
+    output:
+        temp("reads/{accession}/{accession}_1.fastq"),
+        temp("reads/{accession}/{accession}_2.fastq")
+    params:
+        args = "--split-files --include-technical --progress --details",
+        accession = "{accession}"
+    log:
+        "reads/{accession}/{accession}.log"
+    conda:
+        "env.yml"
+    shell:
+        'mkdir -p reads/{params.accession} && \
+        fasterq-dump {params.args} {params.accession} -O reads/{params.accession}'
 
 
 
@@ -63,7 +63,7 @@ rule python:
     input:
         files=expand("{accession}.hdf5", accession=config["accession"]),
         script="python.py"
-    outout:
+    output:
         "h5dumphdf5/Results/{accession}.tsv"
     shell:
         "python {input.script} -i {input.files} -o {output}"
@@ -82,16 +82,16 @@ rule R:
 
 
 
-#rule mergeQuant:
-#    input:
-#        expand("quant/{accession}/abundance.h5",accession=config["accession"])
-#    output:
-#        out1="sleuth_object.so",
-#        out2="gene_table_results.txt"
-#    params:
-#        wd=cwd,
-#        condition="conditions.txt"
-#    conda:
-#        "r.yml"
-#    shell:
-#        "Rscript sleuthR.R {params.wd} {params.condition}"
+rule mergeQuant:
+    input:
+        expand("quant/{accession}/abundance.h5",accession=config["accession"])
+    output:
+        out1="sleuth_object.so",
+        out2="gene_table_results.txt"
+    params:
+        wd=cwd,
+        condition="conditions.txt"
+    conda:
+        "r.yml"
+    shell:
+        "Rscript sleuthR.R {params.wd} {params.condition}"
