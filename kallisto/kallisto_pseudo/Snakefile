@@ -24,4 +24,6 @@ kallistopseudo:
         "{accession}matrix.ec",
         "{accession}matrix.cells"
     shell:
-        "kallisto pseudo --quant -i {input.index} -o output -b batch.txt"
+        """
+        kallisto pseudo --quant -i {input.index} -o output -b batch.txt
+        """

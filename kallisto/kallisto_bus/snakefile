@@ -4,22 +4,22 @@ accession= config["accession"]
 
 rule all:
     input:
-        expand("bus/{accession}/output.bus", sample=config["accession]),
+        expand("bus/{accession}/output.bus", sample=config[accession]),
         expand("bus/{accession}/matrix.ec", sample=config["accession"]),
         expand("bus/{accession}/transcripts.txt", sample=config["accession"])
 
 
 rule download_kallisto_index:
-  output:
-      "homo_sapiens/Homo_sapiens.GRCh38.96.gtf",
-      "homo_sapiens/Homo_sapiens.GRCh38.cdna.all.fa",
-      "homo_sapiens/transcriptome.idx",
-      "homo_sapiens/transcripts_to_genes.txt"
-  conda:
-      "env.yml"
-  shell:
-      "curl https://github.com/pachterlab/kallisto-transcriptome-indices/releases/download/ensembl-96/homo_sapiens.tar.gz && \
-      gunzip homo_sapiens.tar.gz"
+    output:
+        "homo_sapiens/Homo_sapiens.GRCh38.96.gtf",
+        "homo_sapiens/Homo_sapiens.GRCh38.cdna.all.fa",
+        "homo_sapiens/transcriptome.idx",
+        "homo_sapiens/transcripts_to_genes.txt"
+    conda:
+        "env.yml"
+    shell:
+        "curl https://github.com/pachterlab/kallisto-transcriptome-indices/releases/download/ensembl-96/homo_sapiens.tar.gz && \
+    gunzip homo_sapiens.tar.gz"
 
 rule kallistoBus:
     input:
@@ -50,6 +50,6 @@ rule bustools:
     conda:
         "env.yml"
     shell:
-        "mkdir -p count"
-        "bustools sort -p {input.bus} | bustools count -o count/final.count"
+        "mkdir -p count",
+        "bustools sort -p {input.bus} | bustools count -o count/final.count",
         count kallistodan kaldırıldı

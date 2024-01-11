@@ -1,13 +1,5 @@
----
-title: "Bulk_RNA_matrix"
-author: "beyza"
-date: "2022-11-06"
-output: html_document
----
-
 
 ```{r}
-
 setwd("~/Desktop/Bioinformatic/Car-T/SRP238929/K_quant")
 base_dir <- "./quant"
 sample_id <- dir(file.path(base_dir))
@@ -32,7 +24,7 @@ list_of_files <- data.frame(lapply(file_list, read.csv, sep="\t"))
 ```
 
 
-tpmleri almak ve ismini değiştirmek için
+To get tpms and rename them
 ```{r}
 list_of_files1 <- list_of_files[ , grepl( "tpm" , names( list_of_files ) ) ]
 file_list_list<-as.list(file_list)
@@ -61,8 +53,6 @@ list_of_files3$target_id<-gsub("\\..*","",list_of_files3$target_id)
 ```
 
 
-
-??????????????????target_id kontrol bunıu düzenle
 ```{r}
 identical(x, y, num.eq = TRUE, single.NA = TRUE, attrib.as.set = TRUE,
           ignore.bytecode = TRUE, ignore.environment = FALSE,
@@ -74,7 +64,7 @@ install.packages("parallel")
 target_id_merge<-merge(list_of_files1, list_of_files3, all.x = TRUE)
 ```
 
-biomart gen isimlerini çekmek için
+biomart to capture gene names
 ```{r}
 install.packages("rds")
 BiocManager::install("biomaRt")
