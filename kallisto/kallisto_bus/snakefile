@@ -1,0 +1,55 @@
+configfile: "config.yaml"
+accession= config["accession"]
+
+
+rule all:
+    input:
+        expand("bus/{accession}/output.bus", sample=config["accession]),
+        expand("bus/{accession}/matrix.ec", sample=config["accession"]),
+        expand("bus/{accession}/transcripts.txt", sample=config["accession"])
+
+
+rule download_kallisto_index:
+  output:
+      "homo_sapiens/Homo_sapiens.GRCh38.96.gtf",
+      "homo_sapiens/Homo_sapiens.GRCh38.cdna.all.fa",
+      "homo_sapiens/transcriptome.idx",
+      "homo_sapiens/transcripts_to_genes.txt"
+  conda:
+      "env.yml"
+  shell:
+      "curl https://github.com/pachterlab/kallisto-transcriptome-indices/releases/download/ensembl-96/homo_sapiens.tar.gz && \
+      gunzip homo_sapiens.tar.gz"
+
+rule kallistoBus:
+    input:
+        "cdna.all.fa.index",
+        expand("{accession}_1.fastq", accession=config["accession"]),
+        expand("{accession}_2.fastq", accession=config["accession"])
+    output:
+        "bus/{accession}/output.bus",
+        "bus/{accession}/matrix.ec",
+        "bus/{accession}/transcripts.txt"
+    conda:
+        "env.yml"
+    shell:
+        "mkdir -p bus && \
+        kallisto bus -i cdna.all.fa.index -o bus/ *.fastq"
+
+#-x {sc_tech}
+#benzer teknolojiyeb bbak oluyorsa o teknolojiyi yaz barkodlama
+
+
+rule bustools:
+    input:
+        bus="bus/{accession}/output.bus",
+        matrix="bus/{accession}/matrix.ec",
+        trns="bus/{accession}/transcripts.txt"
+    output:
+        count=""
+    conda:
+        "env.yml"
+    shell:
+        "mkdir -p count"
+        "bustools sort -p {input.bus} | bustools count -o count/final.count"
+        count kallistodan kaldırıldı

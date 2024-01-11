@@ -1,0 +1,27 @@
+configfile: "config.yaml"
+accession= config["accession"]
+
+
+rule all:
+    input:
+        expand("{accession}matrix.tsv", accession=config["accession"]),
+        expand("{accession}matrix.ec", accession=config["accession"]),
+        expand("{accession}matrix.cells", accession=config["accession"])
+
+
+
+
+kallistopseudo:
+    input:
+        "homo_sapiens/Homo_sapiens.GRCh38.96.gtf",
+        "homo_sapiens/Homo_sapiens.GRCh38.cdna.all.fa",
+        "homo_sapiens/transcripts_to_genes.txt",
+        index="homo_sapiens/transcriptome.idx",
+        r1="{accession}_1.fastq",
+        r2="{accession}_2.fastq"
+    output:
+        "{accession}matrix.tsv",
+        "{accession}matrix.ec",
+        "{accession}matrix.cells"
+    shell:
+        "kallisto pseudo --quant -i {input.index} -o output -b batch.txt"

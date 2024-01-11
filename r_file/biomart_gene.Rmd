@@ -1,0 +1,83 @@
+---
+title: "ensebl gene id"
+author: "beyza"
+date: "2022-10-17"
+output: html_document
+---
+
+The following commands will connect us to Ensembl's latest Human Genes BioMart release.
+```{r}
+library(biomaRt)
+ensembl <- useEnsembl(biomart = "genes", dataset = "hsapiens_gene_ensembl")
+```
+
+Identifying the database you need
+```{r}
+listEnsembl()
+```
+ 
+We will select the main Ensembl mart which provides access to gene annotation information.
+```{r}
+ensembl <- useEnsembl(biomart = "genes")
+```
+ 
+In the next step we will look at what datasets are available in the selected BioMart using the function
+```{r}
+datasets <- listDatasets(ensembl)
+head(datasets)
+```
+ 
+will try to find any entry that matches a particular term or pattern. For example, if we want to find the details of any dataset containing the term 'hsapiensembl' in our mart, we can do the following:
+```{r}
+searchDatasets(mart = ensembl, pattern = "hsapiens")
+```
+ 
+To use a dataset we can update our object using the Marfunction 
+```{r}
+ensembl <- useDataset(dataset = "hsapiens_gene_ensembl", mart = ensembl)
+```
+ 
+As mentioned before, if the dataset you want to use is already known, i.e. you have done this before, we can select both the database and the dataset in one step:
+```{r}
+ensembl <- useEnsembl(biomart = "genes", dataset = "hsapiens_gene_ensembl")
+```
+ 
+For example, we can first list the available Ensembl Genomes marketplaces:
+```{r}
+listEnsemblGenomes()
+```
+
+ 
+After selecting a dataset to retrieve data from, we need to create a query and send it to the Ensembl BioMart server. We do this using the getBM() function.
+
+The function getBM() has three arguments that need to be introduced: filters, values, and attributes.
+
+```{r}
+filters = listFilters(ensembl)
+```
+```{r}
+attributes = listAttributes(ensembl)
+```
+
+
+```{r}
+a <- biomaRt::getBM( attributes = c("ensembl_transcript_id", "transcript_version", "ensembl_gene_id", "external_gene_name", "description","transcript_biotype"),mart = ensembl)
+```
+
+for chromosome names
+```{r}
+listFilterOptions(mart = ensembl, filter = "chromosome_name")
+```
+
+ Attribute Pages
+```{r}
+pages = attributePages(ensembl)
+pages
+mart <- useEnsembl(dataset = "hsapiens_gene_ensembl", biomart='ensembl')
+```
+ 
+ 
+ 
+ 
+ 
+ 
